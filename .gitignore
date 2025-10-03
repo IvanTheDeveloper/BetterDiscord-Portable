@@ -1,0 +1,8 @@
+# User data
+data/*
+
+# App modules
+app/app-*/modules/
+
+# Better discord injection
+!app/app-*/modules/discord_desktop_core-1/discord_desktop_core/index.js
