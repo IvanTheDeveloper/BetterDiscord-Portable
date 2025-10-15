@@ -35,39 +35,21 @@ if not exist "%DISCORD_EXE%" (
 
 :: Auto-inject BetterDiscord if enabled
 if /i "%autoinject%"=="true" (
-    echo Checking BetterDiscord injection...
-
     set "CORE_FILE=%APP_DIR%\modules\discord_desktop_core-1\discord_desktop_core\index.js"
-    set "INJECT_LINE=require(\"..\\..\\..\\..\\..\\betterdiscord.asar\");"
-
-    if exist "%CORE_FILE%" (
-        for /f "usebackq delims=" %%L in ("%CORE_FILE%") do (
-            set "firstline=%%L"
-            goto :check_first
-        )
-        :check_first
-        if not defined firstline (
-            echo index.js is empty. Injecting line.
-            (echo %INJECT_LINE%) > "%CORE_FILE%"
-        ) else (
-            echo First line: !firstline!
-            echo Checking if injection is already present...
-            echo !firstline! | find /i "%INJECT_LINE%" >nul
-            if errorlevel 1 (
-                echo Injecting BetterDiscord line at the top...
-                set "TMP_FILE=%TEMP%\index_tmp_%RANDOM%.js"
-                (
-                    echo %INJECT_LINE%
-                    type "%CORE_FILE%"
-                ) > "%TMP_FILE%"
-                move /y "%TMP_FILE%" "%CORE_FILE%" >nul
-                echo Injection completed.
-            ) else (
-                echo Injection already present. Skipping.
-            )
+    set "PATCHED_CORE_FILE=%cd%\injection.txt"
+    
+    if exist "!CORE_FILE!" (
+        set "line_count=0"
+        for /f "delims=" %%a in ('type "!CORE_FILE!" ^| findstr /r /v "^$"') do set /a "line_count+=1"
+        
+        if !line_count! LEQ 1 (
+            if exist "!PATCHED_CORE_FILE!" (
+                copy /y "!PATCHED_CORE_FILE!" "!CORE_FILE!" >nul
+            ) 
         )
     ) else (
-        echo Could not find "%CORE_FILE%"
+        echo This seems to be your first launch. Restart Discord after it updates to complete BetterDiscord injection.
+        pause
     )
 )
 
@@ -79,5 +61,4 @@ set "ARGS="
 if /i "%vanilla%"=="true" set "ARGS=--vanilla"
 
 :: Launch Discord
-echo Starting: "%DISCORD_EXE%" %ARGS%
-start "" "%DISCORD_EXE%" %ARGS%
+start "" /B "%DISCORD_EXE%" %ARGS%
