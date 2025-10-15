@@ -4,14 +4,15 @@ This project is not affiliated with, associated with, authorized by, endorsed by
 
 The names **Discord™**, **Portapps**, and **BetterDiscord**, as well as related names, marks, emblems and images, are registered trademarks of their respective owners.
 
-##  FAQ
+## FAQ
+
 - **What does this do?**
 
-    This project mimics Portapps approach while keeping updates working. The Electron userData path is forced to the data folder inside the portable root. A shortcut is created at launch to enable native notifications and is removed when Discord closes.
+  This project mimics Portapps approach while keeping updates working. The Electron userData path is forced to the data folder inside the portable root. Additionally, the injection is repatched on launch if it gets removed after an automatic update.
 
 - **Why don't you use the Discord portable made by Portapps?**
 
-    Discord portable and BetterDiscord are incompatible with each other. Installing BetterDiscord on the Portapps build is technically possible, but causes Discord to break after the first launch. Full explanation below.
+  Discord portable and BetterDiscord are incompatible with each other. Installing BetterDiscord on the Portapps build is technically possible, but causes Discord to break after the first launch. Full explanation below.
 
 - **For all BetterDiscord-related questions (PTB / Canary compatibility, ban risk, etc.), please refer to the BetterDiscord project page.**
 
