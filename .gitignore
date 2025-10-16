@@ -1,8 +1,17 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+[Ll]og{s,}/
+*.log
+
 # User data
-data/*
+data/
 
 # App modules
 app/app-*/modules/
 
-# Better discord injection
+# BetterDiscord injection
 !app/app-*/modules/discord_desktop_core-1/discord_desktop_core/index.js
