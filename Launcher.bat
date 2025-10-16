@@ -4,13 +4,17 @@ setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
 :: Read configuration from config.ini
-set "vanilla=false"
 set "autoinject=false"
-for /f "tokens=1,2 delims== " %%A in ('findstr /i "vanilla=" "config.ini"') do (
-    if /i "%%A"=="vanilla" set "vanilla=%%B"
-)
+set "multi-instance=false"
+set "vanilla=false"
 for /f "tokens=1,2 delims== " %%A in ('findstr /i "autoinject-after-update=" "config.ini"') do (
     if /i "%%A"=="autoinject-after-update" set "autoinject=%%B"
+)
+for /f "tokens=1,2 delims== " %%A in ('findstr /i "multiple-instances=" "config.ini"') do (
+    if /i "%%A"=="multiple-instances" set "multi-instance=%%B"
+)
+for /f "tokens=1,2 delims== " %%A in ('findstr /i "vanilla=" "config.ini"') do (
+    if /i "%%A"=="vanilla" set "vanilla=%%B"
 )
 
 :: Search for app\app-* folder
@@ -42,6 +46,7 @@ if /i "%autoinject%"=="true" (
         set "line_count=0"
         for /f "delims=" %%a in ('type "!CORE_FILE!" ^| findstr /r /v "^$"') do set /a "line_count+=1"
         
+        :: Restore patched core file from backup if it only contanins one line (indicating a failed injection)
         if !line_count! LEQ 1 (
             if exist "!PATCHED_CORE_FILE!" (
                 copy /y "!PATCHED_CORE_FILE!" "!CORE_FILE!" >nul
@@ -53,12 +58,23 @@ if /i "%autoinject%"=="true" (
     )
 )
 
-:: Force Electron data path to root\data
-set "DISCORD_USER_DATA_DIR=%cd%\data"
+:: Manage multi-instancing if enabled
+if /i "%multi-instance%"=="true" (
+    set "instance_count=0"
 
-:: Build optional arguments
+    :: Workaround to count running discord instances by substracting processes search results
+    for /f %%a in ('wmic process where name^="discord.exe" ^| find "dis" /c') do set "dis_count=%%a"
+    for /f %%b in ('wmic process where name^="discord.exe" ^| find "discord" /c') do set "discord_count=%%b"
+    set /a "instance_count=!dis_count! - !discord_count!"
+    
+    set /a "next_instance=!instance_count! + 1"
+    set "DISCORD_USER_DATA_DIR=%cd%\data\profile-!next_instance!"
+) else (
+    set "DISCORD_USER_DATA_DIR=%cd%\data\profile-1"
+)
+
+:: Build optional arguments and launch Discord
 set "ARGS="
 if /i "%vanilla%"=="true" set "ARGS=--vanilla"
-
-:: Launch Discord
+if /i "%multi-instance%"=="true" set "ARGS=%ARGS% --multi-instance"
 start "" /B "%DISCORD_EXE%" %ARGS%
