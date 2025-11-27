@@ -7,6 +7,8 @@ cd /d "%~dp0"
 set "autoinject=false"
 set "multi-instance=false"
 set "vanilla=false"
+set "priority=normal"
+
 for /f "tokens=1,2 delims== " %%A in ('findstr /i "autoinject-after-update=" "config.ini"') do (
     if /i "%%A"=="autoinject-after-update" set "autoinject=%%B"
 )
@@ -15,6 +17,9 @@ for /f "tokens=1,2 delims== " %%A in ('findstr /i "multiple-instances=" "config.
 )
 for /f "tokens=1,2 delims== " %%A in ('findstr /i "vanilla=" "config.ini"') do (
     if /i "%%A"=="vanilla" set "vanilla=%%B"
+)
+for /f "tokens=1,2 delims== " %%A in ('findstr /i "priority=" "config.ini"') do (
+    if /i "%%A"=="priority" set "priority=%%B"
 )
 
 :: Search for app\app-* folder
@@ -77,4 +82,4 @@ if /i "%multi-instance%"=="true" (
 set "ARGS="
 if /i "%vanilla%"=="true" set "ARGS=--vanilla"
 if /i "%multi-instance%"=="true" set "ARGS=%ARGS% --multi-instance"
-start "" /B "%DISCORD_EXE%" %ARGS%
+start "" /B /%PRIORITY% "%DISCORD_EXE%" %ARGS%
