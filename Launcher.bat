@@ -78,8 +78,26 @@ if /i "%multi-instance%"=="true" (
     set "DISCORD_USER_DATA_DIR=%cd%\data\profile-1"
 )
 
+:: Make all profiles share the same BetterDiscord installation via symlink
+set "LINK=%DISCORD_USER_DATA_DIR%\BetterDiscord\data\betterdiscord.asar"
+set "TARGET=..\..\..\betterdiscord.asar"
+
+dir "%LINK%" 2>nul | find "<SYMLINK>" >nul
+if %errorlevel%==0 goto :launch_app
+
+if exist "%LINK%" del "%LINK%"
+mklink "%LINK%" "%TARGET%"
+
+:: Creating symlink will fail without administrator privileges
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Solicitando permisos de administrador para crear el symlink...
+    powershell -Command "Start-Process cmd -ArgumentList '/c mklink \"%LINK%\" \"%TARGET%\"' -Verb RunAs"
+)
+
+:launch_app
 :: Build optional arguments and launch Discord
 set "ARGS="
-if /i "%vanilla%"=="true" set "ARGS=--vanilla"
+if /i "%vanilla%"=="true" set "ARGS=%ARGS% --vanilla"
 if /i "%multi-instance%"=="true" set "ARGS=%ARGS% --multi-instance"
 start "" /B /%PRIORITY% "%DISCORD_EXE%" %ARGS%
